@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ustechautomations.github.io/sunday-calls/sitemap.xml

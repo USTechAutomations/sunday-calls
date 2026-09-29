@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pre-order received — Sunday Calls</title>
+<style>
+:root { --paper: #f3ecdf; --ink: #3a2a1f; }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
+  line-height: 1.55;
+}
+main { max-width: 38rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+h1 { font-size: 1.75rem; line-height: 1.25; font-weight: 600; margin: 0 0 0.75rem; }
+h2 { font-size: 1.2rem; line-height: 1.3; font-weight: 600; margin: 1.75rem 0 0.4rem; }
+p, li { font-size: 1.05rem; }
+a { color: inherit; }
+a:focus { outline: 2px solid currentColor; outline-offset: 3px; }
+a.button {
+  display: block;
+  margin: 1rem 0;
+  padding: 0.95rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+}
+.status { font-size: 0.92rem; }
+footer { margin-top: 2.5rem; font-size: 0.95rem; }
+ul { padding-left: 1.2rem; }
+@media (min-width: 700px) {
+  main { padding-top: 2.5rem; }
+  h1 { font-size: 2.15rem; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Pre-order received</h1>
+<p>Thank you. This page does not show your name, your phone number, or your email.</p>
+<p id="ref-status" class="status">This page looks only at the address in the browser. It does not contact a server.</p>
+
+<h2>What happens next</h2>
+<ul>
+<li>We phone the storyteller within 7 days of the test closing.</li>
+<li>The test closes 30 days after the page goes live.</li>
+<li>If we do not reach enough pre-orders to start, every pre-order is refunded in full.</li>
+<li>If we start, there are eight weekly calls. You get the recordings. First books ship about 12 weeks after your storyteller's first call.</li>
+<li>The first call says it is an AI interviewer, that the call is recorded, and asks if now is a good time. They can say no and we never call again.</li>
+</ul>
+<p class="status">Nothing on this page is a receipt with personal details. Keep the confirmation from the payment page itself.</p>
+<a class="button" href="index.html">Back to the pre-order</a>
+
+<footer>
+<p>Sunday Calls</p>
+<p>an AI interviewer makes the calls</p>
+<p><a href="faq.html">Questions</a> · <a href="privacy.html">Privacy</a></p>
+</footer>
+</main>
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var ref = params.get("s");
+  var el = document.getElementById("ref-status");
+  if (!el) { return; }
+  if (ref && String(ref).length > 0) {
+    el.textContent = "A checkout reference was in the address. We do not show it here.";
+  } else {
+    el.textContent = "No checkout reference was in this address.";
+  }
+}());
+</script>
+</body>
+</html>
