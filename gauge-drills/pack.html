@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'none'">
+<title>Your Gauge Drills pack</title>
+<meta name="description" content="Open and practice the Gauge Drills pack you paid for.">
+<link rel="canonical" href="https://ustechautomations.github.io/sunday-calls/gauge-drills/pack.html">
+<style>
+:root { --bg: #f3f6f8; --ink: #12324a; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #12324a; --ink: #f3f6f8; }
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); }
+body {
+  margin: 0 auto;
+  max-width: 42rem;
+  padding: 1.25rem;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+h1 { font-size: 1.5rem; line-height: 1.3; }
+a { color: var(--ink); }
+button, .btn-primary, select {
+  font: inherit;
+  min-height: 44px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+}
+button, .btn-primary {
+  color: var(--bg);
+  background: var(--ink);
+  padding: 0.5rem 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+button.tab, button.choice, select {
+  color: var(--ink);
+  background: var(--bg);
+}
+button.tab { margin: 0 0.4rem 0.4rem 0; }
+button.choice { display: block; width: 100%; text-align: left; margin: 0.4rem 0; }
+button.tab.on { color: var(--bg); background: var(--ink); }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.status { font-size: 0.95rem; }
+footer { margin-top: 2rem; font-size: 0.9rem; }
+.print-only { display: none; }
+@media print {
+  .noprint { display: none !important; }
+  .print-only { display: block; }
+  body { max-width: none; }
+}
+</style>
+</head>
+<body>
+<h1>Your Gauge Drills pack</h1>
+<p id="status" class="status" aria-live="polite"></p>
+<p id="facts"></p>
+<div id="tabs" class="noprint"></div>
+<div id="topics" class="noprint"></div>
+<p id="score" class="noprint"></p>
+<div id="question" class="noprint"></div>
+<p class="noprint"><button type="button" id="practice-set">Practice set</button> <button type="button" id="save-copy">Save a copy</button> <button type="button" id="print-pack">Print</button></p>
+<h2 class="noprint">Rules at a glance</h2>
+<div id="sheet" class="noprint"></div>
+<div id="print-root" class="print-only"></div>
+<p><a href="https://ustechautomations.github.io/sunday-calls/gauge-drills/">Gauge Drills</a></p>
+<footer>
+<p>Gauge Drills is not affiliated with or endorsed by the U.S. Environmental Protection Agency (EPA).</p>
+<p>The questions are written by us. They are not the real test questions.</p>
+<p>Passing is not guaranteed.</p>
+<p>Payments are handled by Stripe; your receipt shows the business name US Tech Automations.</p>
+<p><a href="mailto:ustechautomations@gmail.com">ustechautomations@gmail.com</a></p>
+</footer>
+<script>
+/* GD-CRYPTO-BEGIN */
+const GD_NAME_LABEL = "gauge-drills/name/v1|";
+const GD_KEY_LABEL = "gauge-drills/key/v1|";
+const GD_AD_TEXT = "gauge-drills/v1";
+
+function gdEncode(text) {
+  return new TextEncoder().encode(text);
+}
+
+function gdHex(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let hex = "";
+  for (let i = 0; i < bytes.length; i++) {
+    hex += bytes[i].toString(16).padStart(2, "0");
+  }
+  return hex;
+}
+
+function gdB64ToBytes(b64) {
+  const clean = String(b64).replace(/\s/g, "");
+  const bin = atob(clean);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    out[i] = bin.charCodeAt(i);
+  }
+  return out;
+}
+
+async function gdNameFor(sessionId) {
+  const digest = await crypto.subtle.digest("SHA-256", gdEncode(GD_NAME_LABEL + sessionId));
+  return gdHex(digest).slice(0, 40);
+}
+
+async function gdKeyFor(sessionId) {
+  return crypto.subtle.digest("SHA-256", gdEncode(GD_KEY_LABEL + sessionId));
+}
+
+async function gdOpen(sessionId, blob) {
+  const raw = await gdKeyFor(sessionId);
+  const key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+  const iv = gdB64ToBytes(blob.n);
+  const cipher = gdB64ToBytes(blob.c);
+  const additionalData = gdEncode(GD_AD_TEXT);
+  const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv, additionalData}, key, cipher);
+  return new TextDecoder().decode(plain);
+}
+
+globalThis.gdNameFor = gdNameFor;
+globalThis.gdKeyFor = gdKeyFor;
+globalThis.gdOpen = gdOpen;
+/* GD-CRYPTO-END */
+const GD_VIEWER_SOURCE = document.currentScript ? document.currentScript.textContent : "";
+const GD_ID = /^cs_(live|test)_[A-Za-z0-9]{10,200}$/;
+const GD_FAIL = "This pack could not be opened. Check the address is the one you were sent to after paying.";
+const GD_PARTS = ["Core", "Type 1", "Type 2", "Type 3"];
+const GD_HOSTS = {
+  "epa.gov": true,
+  "www.epa.gov": true,
+  "ecfr.gov": true,
+  "www.ecfr.gov": true,
+  "federalregister.gov": true,
+  "www.federalregister.gov": true
+};
+const state = {
+  data: null,
+  part: "Core",
+  topic: "All",
+  index: 0,
+  order: [],
+  seen: {},
+  scores: { part: {}, topic: {} }
+};
+
+function showFail() {
+  const status = document.getElementById("status");
+  status.className = "status";
+  status.textContent = GD_FAIL;
+}
+
+function clearNode(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+function esc(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function safeSource(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return "";
+    if (!GD_HOSTS[parsed.hostname.toLowerCase()]) return "";
+    return url;
+  } catch (err) {
+    return "";
+  }
+}
+
+function bump(map, key, right) {
+  if (!map[key]) map[key] = { ok: 0, n: 0 };
+  map[key].n += 1;
+  if (right) map[key].ok += 1;
+}
+
+function formatScores() {
+  const bits = [];
+  GD_PARTS.forEach(function (part) {
+    const row = state.scores.part[part] || { ok: 0, n: 0 };
+    bits.push(part + ": " + row.ok + " of " + row.n);
+  });
+  Object.keys(state.scores.topic).forEach(function (topic) {
+    const row = state.scores.topic[topic];
+    bits.push(topic + ": " + row.ok + " of " + row.n);
+  });
+  return bits.join(" · ");
+}
+
+function showScore() {
+  document.getElementById("score").textContent = "Score " + formatScores();
+}
+
+function questions() {
+  return (state.data && state.data.bank && state.data.bank.questions) || [];
+}
+
+function filterQuestions() {
+  const all = questions();
+  const out = [];
+  for (let i = 0; i < all.length; i++) {
+    const row = all[i];
+    if (row.part !== state.part) continue;
+    if (state.topic !== "All" && row.topic !== state.topic) continue;
+    out.push(i);
+  }
+  return out;
+}
+
+function shuffle(list) {
+  const copy = list.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const hold = copy[i];
+    copy[i] = copy[j];
+    copy[j] = hold;
+  }
+  return copy;
+}
+
+function buildTabs() {
+  const root = document.getElementById("tabs");
+  clearNode(root);
+  GD_PARTS.forEach(function (part) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = part === state.part ? "tab on" : "tab";
+    button.textContent = part;
+    button.setAttribute("aria-pressed", part === state.part ? "true" : "false");
+    button.addEventListener("click", function () {
+      state.part = part;
+      state.topic = "All";
+      state.index = 0;
+      state.order = filterQuestions();
+      buildTabs();
+      buildTopics();
+      showSheet();
+      showQuestion();
+    });
+    root.appendChild(button);
+  });
+}
+
+function buildTopics() {
+  const root = document.getElementById("topics");
+  clearNode(root);
+  const label = document.createElement("label");
+  label.textContent = "Topic ";
+  const select = document.createElement("select");
+  select.id = "topic-filter";
+  label.htmlFor = "topic-filter";
+  const names = ["All"].concat((state.data.bank.topics && state.data.bank.topics[state.part]) || []);
+  names.forEach(function (name) {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    if (name === state.topic) option.selected = true;
+    select.appendChild(option);
+  });
+  select.addEventListener("change", function () {
+    state.topic = select.value;
+    state.index = 0;
+    state.order = filterQuestions();
+    showQuestion();
+  });
+  label.appendChild(select);
+  root.appendChild(label);
+}
+
+function showResult(host, row) {
+  const picked = state.seen[row.id];
+  if (!picked) return;
+  const note = document.createElement("p");
+  note.className = "status";
+  note.textContent = picked.right ? "Right." : "Wrong.";
+  host.appendChild(note);
+  const explain = document.createElement("p");
+  explain.textContent = row.explain || "";
+  host.appendChild(explain);
+  const href = safeSource(row.source);
+  if (href) {
+    const link = document.createElement("a");
+    link.href = href;
+    link.rel = "noreferrer";
+    link.textContent = "Source";
+    host.appendChild(link);
+  } else if (row.source) {
+    const plain = document.createElement("p");
+    plain.className = "status";
+    plain.textContent = "Source: " + row.source;
+    host.appendChild(plain);
+  }
+}
+
+function showQuestion() {
+  const host = document.getElementById("question");
+  clearNode(host);
+  const all = questions();
+  if (!state.order.length) {
+    const empty = document.createElement("p");
+    empty.className = "status";
+    empty.textContent = "No questions in this part.";
+    host.appendChild(empty);
+    return;
+  }
+  if (state.index >= state.order.length) state.index = state.order.length - 1;
+  if (state.index < 0) state.index = 0;
+  const row = all[state.order[state.index]];
+  const heading = document.createElement("p");
+  heading.textContent = row.part + " · " + row.topic + " · " + (state.index + 1) + " of " + state.order.length;
+  host.appendChild(heading);
+  const stem = document.createElement("p");
+  stem.textContent = row.q;
+  host.appendChild(stem);
+  const letters = "ABCDEFGH";
+  (row.options || []).forEach(function (choice, index) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "choice";
+    button.textContent = letters.charAt(index) + ". " + choice;
+    if (state.seen[row.id]) button.disabled = true;
+    button.addEventListener("click", function () {
+      if (state.seen[row.id]) return;
+      const right = index === row.answer;
+      state.seen[row.id] = { choice: index, right: right };
+      bump(state.scores.part, row.part, right);
+      bump(state.scores.topic, row.topic, right);
+      showScore();
+      showQuestion();
+    });
+    host.appendChild(button);
+  });
+  showResult(host, row);
+  const nav = document.createElement("p");
+  const back = document.createElement("button");
+  back.type = "button";
+  back.textContent = "Back";
+  back.disabled = state.index === 0;
+  back.addEventListener("click", function () {
+    if (state.index > 0) {
+      state.index -= 1;
+      showQuestion();
+    }
+  });
+  const next = document.createElement("button");
+  next.type = "button";
+  next.textContent = "Next";
+  next.disabled = state.index >= state.order.length - 1;
+  next.addEventListener("click", function () {
+    if (state.index < state.order.length - 1) {
+      state.index += 1;
+      showQuestion();
+    }
+  });
+  nav.appendChild(back);
+  nav.appendChild(document.createTextNode(" "));
+  nav.appendChild(next);
+  host.appendChild(nav);
+}
+
+function showSheet() {
+  const root = document.getElementById("sheet");
+  clearNode(root);
+  const sheets = (state.data.sheets && state.data.sheets.sheets) || [];
+  let sheet = null;
+  for (let i = 0; i < sheets.length; i++) {
+    if (sheets[i].part === state.part) sheet = sheets[i];
+  }
+  if (!sheet) return;
+  const title = document.createElement("p");
+  title.textContent = sheet.title || "";
+  root.appendChild(title);
+  (sheet.lines || []).forEach(function (line) {
+    const para = document.createElement("p");
+    para.textContent = line.text;
+    const href = safeSource(line.source);
+    if (href) {
+      para.appendChild(document.createTextNode(" "));
+      const link = document.createElement("a");
+      link.href = href;
+      link.rel = "noreferrer";
+      link.textContent = "Source";
+      para.appendChild(link);
+    }
+    root.appendChild(para);
+  });
+}
+
+function buildPrint() {
+  const root = document.getElementById("print-root");
+  clearNode(root);
+  const qs = questions();
+  const qHead = document.createElement("h2");
+  qHead.textContent = "Questions";
+  root.appendChild(qHead);
+  qs.forEach(function (row, index) {
+    const stem = document.createElement("p");
+    stem.textContent = (index + 1) + ". " + row.q;
+    root.appendChild(stem);
+    (row.options || []).forEach(function (choice, choiceIndex) {
+      const line = document.createElement("p");
+      line.textContent = "ABCDEFGH".charAt(choiceIndex) + ". " + choice;
+      root.appendChild(line);
+    });
+  });
+  const aHead = document.createElement("h2");
+  aHead.textContent = "Answers";
+  root.appendChild(aHead);
+  qs.forEach(function (row, index) {
+    const line = document.createElement("p");
+    const letter = "ABCDEFGH".charAt(row.answer) || "";
+    line.textContent = (index + 1) + ". " + letter + ". " + (row.explain || "");
+    root.appendChild(line);
+  });
+}
+
+function practiceSet() {
+  state.topic = "All";
+  const pool = filterQuestions();
+  state.order = shuffle(pool).slice(0, 25);
+  state.index = 0;
+  buildTopics();
+  showQuestion();
+}
+
+function footerHtml() {
+  const paras = document.querySelectorAll("footer p");
+  let html = "<footer>";
+  for (let i = 0; i < paras.length; i++) {
+    html += "<p>" + esc(paras[i].textContent) + "</p>";
+  }
+  html += "<" + "/footer>";
+  return html;
+}
+
+function saveCopy() {
+  if (!state.data || !GD_VIEWER_SOURCE) return;
+  const payload = JSON.stringify(state.data)
+    .replace(/</g, "\\u003c")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+  const css = document.querySelector("style").textContent;
+  const html = "<!doctype html>\n<html lang=\"en\"><head>"
+    + "<meta charset=\"utf-8\">"
+    + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+    + "<meta name=\"referrer\" content=\"no-referrer\">"
+    + "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'none'\">"
+    + "<" + "title>Your Gauge Drills pack<" + "/title>"
+    + "<meta name=\"description\" content=\"A saved copy of your Gauge Drills pack.\">"
+    + "<style>" + css + "<" + "/style><" + "/head><body>"
+    + "<" + "h1>Your Gauge Drills pack<" + "/h1>"
+    + "<p id=\"status\" class=\"status\"></p>"
+    + "<p id=\"facts\"></p>"
+    + "<div id=\"tabs\" class=\"noprint\"></div>"
+    + "<div id=\"topics\" class=\"noprint\"></div>"
+    + "<p id=\"score\" class=\"noprint\"></p>"
+    + "<div id=\"question\" class=\"noprint\"></div>"
+    + "<p class=\"noprint\"><button type=\"button\" id=\"practice-set\">Practice set</button> "
+    + "<button type=\"button\" id=\"save-copy\">Save a copy</button> "
+    + "<button type=\"button\" id=\"print-pack\">Print</button></p>"
+    + "<h2 class=\"noprint\">Rules at a glance</h2>"
+    + "<div id=\"sheet\" class=\"noprint\"></div>"
+    + "<div id=\"print-root\" class=\"print-only\"></div>"
+    + footerHtml()
+    + "<" + 'script id="gd-data" type="application/json">' + payload + "<" + "/script>"
+    + "<" + "script>" + GD_VIEWER_SOURCE + "<" + "/script>"
+    + "<!-- NO-COUNTER --><" + "/body><" + "/html>\n";
+  const blob = new Blob([html], { type: "text/html" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "gauge-drills-pack.html";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+function render(data) {
+  state.data = data;
+  state.part = "Core";
+  state.topic = "All";
+  state.index = 0;
+  state.seen = {};
+  state.scores = { part: {}, topic: {} };
+  const status = document.getElementById("status");
+  status.textContent = "";
+  const checked = data.bank && data.bank.facts_checked ? data.bank.facts_checked : "";
+  document.getElementById("facts").textContent = "facts checked on " + checked;
+  state.order = filterQuestions();
+  buildTabs();
+  buildTopics();
+  showSheet();
+  showQuestion();
+  showScore();
+  buildPrint();
+}
+
+async function bootFromNetwork() {
+  const params = new URLSearchParams(location.search);
+  const sessionId = params.get("s") || "";
+  if (!GD_ID.test(sessionId)) {
+    showFail();
+    return;
+  }
+  try {
+    const name = await gdNameFor(sessionId);
+    const res = await fetch("p/" + name + ".json?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("missing");
+    const blob = await res.json();
+    const text = await gdOpen(sessionId, blob);
+    render(JSON.parse(text));
+  } catch (err) {
+    showFail();
+  }
+}
+
+function start() {
+  const embedded = document.getElementById("gd-data");
+  if (embedded && embedded.textContent.trim()) {
+    try {
+      render(JSON.parse(embedded.textContent));
+    } catch (err) {
+      showFail();
+    }
+    return;
+  }
+  bootFromNetwork();
+}
+
+document.getElementById("practice-set").addEventListener("click", function () {
+  if (!state.data) return;
+  practiceSet();
+});
+document.getElementById("save-copy").addEventListener("click", function () {
+  saveCopy();
+});
+document.getElementById("print-pack").addEventListener("click", function () {
+  window.print();
+});
+start();
+
+</script>
+<!-- NO-COUNTER -->
+</body>
+</html>

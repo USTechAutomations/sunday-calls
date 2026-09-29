@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'none'">
+<title>Thanks — your Gauge Drills pack</title>
+<meta name="description" content="Where your Gauge Drills pack opens after you pay.">
+<link rel="canonical" href="https://ustechautomations.github.io/sunday-calls/gauge-drills/thanks.html">
+<style>
+:root { --bg: #f3f6f8; --ink: #12324a; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #12324a; --ink: #f3f6f8; }
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); }
+body {
+  margin: 0 auto;
+  max-width: 42rem;
+  padding: 1.25rem;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+h1 { font-size: 1.5rem; line-height: 1.3; }
+a { color: var(--ink); }
+button, .btn-primary, select {
+  font: inherit;
+  min-height: 44px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+}
+button, .btn-primary {
+  color: var(--bg);
+  background: var(--ink);
+  padding: 0.5rem 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+button.tab, button.choice, select {
+  color: var(--ink);
+  background: var(--bg);
+}
+button.tab { margin: 0 0.4rem 0.4rem 0; }
+button.choice { display: block; width: 100%; text-align: left; margin: 0.4rem 0; }
+button.tab.on { color: var(--bg); background: var(--ink); }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.status { font-size: 0.95rem; }
+footer { margin-top: 2rem; font-size: 0.9rem; }
+.print-only { display: none; }
+@media print {
+  .noprint { display: none !important; }
+  .print-only { display: block; }
+  body { max-width: none; }
+}
+</style>
+</head>
+<body>
+<h1>Thanks — your Gauge Drills pack</h1>
+<p id="status" class="status" aria-live="polite"></p>
+<p id="late" class="status"></p>
+<p><a href="https://ustechautomations.github.io/sunday-calls/gauge-drills/">Gauge Drills</a></p>
+<footer>
+<p>Gauge Drills is not affiliated with or endorsed by the U.S. Environmental Protection Agency (EPA).</p>
+<p>The questions are written by us. They are not the real test questions.</p>
+<p>Passing is not guaranteed.</p>
+<p>Payments are handled by Stripe; your receipt shows the business name US Tech Automations.</p>
+<p><a href="mailto:ustechautomations@gmail.com">ustechautomations@gmail.com</a></p>
+</footer>
+<script>
+/* GD-CRYPTO-BEGIN */
+const GD_NAME_LABEL = "gauge-drills/name/v1|";
+const GD_KEY_LABEL = "gauge-drills/key/v1|";
+const GD_AD_TEXT = "gauge-drills/v1";
+
+function gdEncode(text) {
+  return new TextEncoder().encode(text);
+}
+
+function gdHex(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let hex = "";
+  for (let i = 0; i < bytes.length; i++) {
+    hex += bytes[i].toString(16).padStart(2, "0");
+  }
+  return hex;
+}
+
+function gdB64ToBytes(b64) {
+  const clean = String(b64).replace(/\s/g, "");
+  const bin = atob(clean);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    out[i] = bin.charCodeAt(i);
+  }
+  return out;
+}
+
+async function gdNameFor(sessionId) {
+  const digest = await crypto.subtle.digest("SHA-256", gdEncode(GD_NAME_LABEL + sessionId));
+  return gdHex(digest).slice(0, 40);
+}
+
+async function gdKeyFor(sessionId) {
+  return crypto.subtle.digest("SHA-256", gdEncode(GD_KEY_LABEL + sessionId));
+}
+
+async function gdOpen(sessionId, blob) {
+  const raw = await gdKeyFor(sessionId);
+  const key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+  const iv = gdB64ToBytes(blob.n);
+  const cipher = gdB64ToBytes(blob.c);
+  const additionalData = gdEncode(GD_AD_TEXT);
+  const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv, additionalData}, key, cipher);
+  return new TextDecoder().decode(plain);
+}
+
+globalThis.gdNameFor = gdNameFor;
+globalThis.gdKeyFor = gdKeyFor;
+globalThis.gdOpen = gdOpen;
+/* GD-CRYPTO-END */
+const GD_ID = /^cs_(live|test)_[A-Za-z0-9]{10,200}$/;
+const GD_INVALID = "This link does not have a valid payment reference.";
+const GD_WAIT = "Your pack is not ready yet. If you have just paid, it is being prepared and will open here, usually within 30 minutes. Keep this page open or bookmark it — this address is your key to the pack.";
+const GD_READY = "Your pack is ready — open it";
+const GD_LATE = "Still not here? Write to ustechautomations@gmail.com with the time you paid. You will get your pack or a full refund.";
+const GD_POLL_MS = 30000;
+const GD_LATE_MS = 2 * 60 * 60 * 1000;
+
+function showReady(sessionId) {
+  const status = document.getElementById("status");
+  while (status.firstChild) status.removeChild(status.firstChild);
+  const link = document.createElement("a");
+  link.className = "btn-primary";
+  link.textContent = GD_READY;
+  link.href = "pack.html?s=" + encodeURIComponent(sessionId);
+  status.appendChild(link);
+}
+
+function startWait(sessionId) {
+  const status = document.getElementById("status");
+  const late = document.getElementById("late");
+  status.textContent = GD_WAIT;
+  const started = Date.now();
+  let timer = 0;
+
+  async function poll() {
+    try {
+      const name = await gdNameFor(sessionId);
+      const res = await fetch("p/" + name + ".json?t=" + Date.now(), { cache: "no-store" });
+      if (res.ok) {
+        if (timer) clearInterval(timer);
+        showReady(sessionId);
+        return;
+      }
+    } catch (err) {
+      /* keep waiting */
+    }
+    if (Date.now() - started >= GD_LATE_MS && late.textContent !== GD_LATE) {
+      late.textContent = GD_LATE;
+    }
+  }
+
+  timer = setInterval(poll, GD_POLL_MS);
+  poll();
+}
+
+const params = new URLSearchParams(location.search);
+const sessionId = params.get("s") || "";
+if (!GD_ID.test(sessionId)) {
+  document.getElementById("status").textContent = GD_INVALID;
+} else {
+  startWait(sessionId);
+}
+
+</script>
+<!-- NO-COUNTER -->
+</body>
+</html>

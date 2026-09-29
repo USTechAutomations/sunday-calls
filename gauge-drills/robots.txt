@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /p/
+Disallow: /thanks.html
+Disallow: /pack.html
+Sitemap: https://ustechautomations.github.io/sunday-calls/gauge-drills/sitemap.xml
