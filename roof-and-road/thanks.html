@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Thanks — your Roof and Road planner</title>
+<meta name="description" content="Where your Roof and Road planner opens after you pay.">
+<style>
+:root{--paper:#f7f5ef;--ink:#23382c;--muted:#5a6b60;--btn-bg:#23382c;--btn-fg:#f7f5ef;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#1b211d;--ink:#e9efe9;--muted:#a9b8ad;--btn-bg:#e9efe9;--btn-fg:#1b211d;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#1b211d;--ink:#e9efe9;--muted:#a9b8ad;--btn-bg:#e9efe9;--btn-fg:#1b211d;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow-wrap:break-word}
+.wrap{max-width:42rem;margin:0 auto;padding:0 16px}
+h1{font-size:1.6rem;line-height:1.25;margin:1.5rem 0 1rem}
+a{color:var(--ink);text-underline-offset:2px}
+a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.status{color:var(--muted);min-height:1.6em}
+.btn-primary{display:inline-block;background:var(--btn-bg);color:var(--btn-fg);padding:.8rem 1.3rem;border-radius:6px;font-weight:700;font-size:1.1rem;text-decoration:none;min-height:44px}
+.muted{color:var(--muted)}
+footer{margin-top:2.5rem;border-top:1px solid var(--muted);padding:1rem 0 2rem;font-size:.9rem;color:var(--muted)}
+footer p{margin:.4rem 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Thanks — your Roof and Road planner</h1>
+<p id="status" class="status" aria-live="polite"></p>
+<p id="late" class="status"></p>
+<p class="muted">Lost the link? Write to ustechautomations@gmail.com with your receipt number.</p>
+<p><a href="https://ustechautomations.github.io/sunday-calls/roof-and-road/">Roof and Road</a></p>
+<footer>
+<p>Roof and Road is not a reserve study and not legal advice. Check your budget report with your association’s attorney.</p>
+<p>The numbers are the board’s own estimates. The board is responsible for what it adopts and sends to members.</p>
+<p>Roof and Road is not affiliated with or endorsed by the State of California, the Department of Real Estate or any other agency.</p>
+<p>Payments are handled by Stripe; your receipt shows the business name US Tech Automations.</p>
+<p><a href="mailto:ustechautomations@gmail.com">ustechautomations@gmail.com</a></p>
+</footer>
+</div>
+<script>
+/* RP-CRYPTO-BEGIN */
+const RP_NAME_LABEL = "roof-and-road/name/v1|";
+const RP_KEY_LABEL = "roof-and-road/key/v1|";
+const RP_AD_TEXT = "roof-and-road/v1";
+
+function rpEncode(text) {
+  return new TextEncoder().encode(text);
+}
+
+function rpHex(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let hex = "";
+  for (let i = 0; i < bytes.length; i++) {
+    hex += bytes[i].toString(16).padStart(2, "0");
+  }
+  return hex;
+}
+
+function rpB64ToBytes(b64) {
+  const clean = String(b64).replace(/\s/g, "");
+  const bin = atob(clean);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    out[i] = bin.charCodeAt(i);
+  }
+  return out;
+}
+
+async function rpNameFor(sessionId) {
+  const digest = await crypto.subtle.digest("SHA-256", rpEncode(RP_NAME_LABEL + sessionId));
+  return rpHex(digest).slice(0, 40);
+}
+
+async function rpKeyFor(sessionId) {
+  return crypto.subtle.digest("SHA-256", rpEncode(RP_KEY_LABEL + sessionId));
+}
+
+async function rpOpen(sessionId, blob) {
+  if (!blob || blob.v !== 1) throw new Error("bad blob");
+  const raw = await rpKeyFor(sessionId);
+  const key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+  const iv = rpB64ToBytes(blob.n);
+  const cipher = rpB64ToBytes(blob.c);
+  if (iv.length !== 12) throw new Error("bad nonce");
+  const additionalData = rpEncode(RP_AD_TEXT);
+  const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv, additionalData}, key, cipher);
+  return new TextDecoder().decode(plain);
+}
+
+globalThis.rpNameFor = rpNameFor;
+globalThis.rpKeyFor = rpKeyFor;
+globalThis.rpOpen = rpOpen;
+/* RP-CRYPTO-END */
+const RP_ID = /^cs_(live|test)_[A-Za-z0-9]{10,200}$/;
+const RP_INVALID = "This link does not have a valid payment reference.";
+const RP_WAIT = "Your planner is not ready yet. If you have just paid, it will open here once our system matches your payment, which it checks for every 10 minutes. Keep this page open or bookmark it — this address is your key to the planner.";
+const RP_READY = "Your planner is ready — open it";
+const RP_LATE = "Still not here? Write to ustechautomations@gmail.com with the time you paid. You will get your planner or a full refund.";
+const RP_POLL_MS = 30000;
+const RP_LATE_MS = 2 * 60 * 60 * 1000;
+
+function rpShowReady(sessionId) {
+  const status = document.getElementById("status");
+  while (status.firstChild) status.removeChild(status.firstChild);
+  const link = document.createElement("a");
+  link.className = "btn-primary";
+  link.textContent = RP_READY;
+  link.href = "planner.html?s=" + encodeURIComponent(sessionId);
+  status.appendChild(link);
+}
+
+function rpStartWait(sessionId) {
+  const status = document.getElementById("status");
+  const late = document.getElementById("late");
+  status.textContent = RP_WAIT;
+  const started = Date.now();
+  let timer = 0;
+
+  async function poll() {
+    try {
+      const name = await rpNameFor(sessionId);
+      const res = await fetch("p/" + name + ".json?t=" + Date.now(), { cache: "no-store" });
+      if (res.ok) {
+        if (timer) clearInterval(timer);
+        rpShowReady(sessionId);
+        return;
+      }
+    } catch (err) {
+      /* keep waiting */
+    }
+    if (Date.now() - started >= RP_LATE_MS && late.textContent !== RP_LATE) {
+      late.textContent = RP_LATE;
+    }
+  }
+
+  timer = setInterval(poll, RP_POLL_MS);
+  poll();
+}
+
+const rpParams = new URLSearchParams(location.search);
+const rpSession = rpParams.get("s") || "";
+if (!RP_ID.test(rpSession)) {
+  document.getElementById("status").textContent = RP_INVALID;
+} else {
+  rpStartWait(rpSession);
+}
+</script>
+<!-- NO-COUNTER -->
+</body>
+</html>

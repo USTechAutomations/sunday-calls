@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Your Roof and Road planner</title>
+<meta name="description" content="Open the Roof and Road planner you paid for.">
+<style>
+/* RP-PLANNER-CSS-BEGIN */
+/* Roof and Road planner styles (WP3). Brand tokens from BRAND.md; system fonts; no outside files. */
+:root {
+  --paper: #f7f5ef;
+  --ink: #23382c;
+  --muted: #5a6b60;
+  --line: #cfd6cf;
+  --card: #fffdf8;
+  --focus: #23382c;
+  --btn-bg: #23382c;
+  --btn-ink: #f7f5ef;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1b211d;
+    --ink: #e9efe9;
+    --muted: #a9b8ad;
+    --line: #3a453d;
+    --card: #222a25;
+    --focus: #e9efe9;
+    --btn-bg: #e9efe9;
+    --btn-ink: #1b211d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1b211d;
+  --ink: #e9efe9;
+  --muted: #a9b8ad;
+  --line: #3a453d;
+  --card: #222a25;
+  --focus: #e9efe9;
+  --btn-bg: #e9efe9;
+  --btn-ink: #1b211d;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.rr-app {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 16px;
+  overflow-wrap: anywhere;
+}
+.rr-app h2 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
+.rr-app h3 { font-size: 1.05rem; margin: 1rem 0 0.4rem; }
+.rr-muted { color: var(--muted); }
+.rr-status { color: var(--muted); min-height: 1.5em; }
+.rr-hidden { display: none !important; }
+
+.rr-card, .rr-first, .rr-reading {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 0 0 16px;
+}
+.rr-first h2 { margin-top: 0; }
+
+.rr-btn {
+  font: inherit;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  padding: 0.5rem 0.9rem;
+  margin: 0.2rem 0.2rem 0.2rem 0;
+  cursor: pointer;
+  min-height: 44px;
+}
+.rr-keep { background: var(--btn-bg); color: var(--btn-ink); }
+.rr-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.rr-small { min-height: 36px; padding: 0.3rem 0.7rem; font-size: 0.95rem; }
+.rr-app :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.rr-field { margin: 0 0 0.8rem; }
+.rr-field label { display: block; margin-bottom: 0.2rem; }
+.rr-app input[type="text"], .rr-app input[type="date"], .rr-app input:not([type]), .rr-app select, .rr-app textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--muted);
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+  width: 100%;
+  max-width: 28rem;
+}
+.rr-app textarea { max-width: 100%; }
+.rr-hint { display: block; font-size: 0.92rem; }
+.rr-check { margin: 0.3rem 0; }
+.rr-check input { width: 1.1rem; height: 1.1rem; vertical-align: middle; }
+
+.rr-rows { margin: 0 0 0.6rem; }
+.rr-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.8rem;
+  align-items: flex-end;
+  border-top: 1px solid var(--line);
+  padding: 0.6rem 0;
+}
+.rr-cell { display: flex; flex-direction: column; min-width: 8rem; flex: 1 1 9rem; }
+.rr-cell-label { font-size: 0.85rem; color: var(--muted); }
+.rr-ref { flex-basis: 100%; margin: 0; font-size: 0.92rem; }
+.rr-row-error { flex-basis: 100%; margin: 0; font-size: 0.92rem; font-weight: 600; }
+.rr-row-error:empty { display: none; }
+
+fieldset.rr-reading, fieldset.rr-goal { border: 1px solid var(--line); border-radius: 8px; }
+fieldset.rr-goal { padding: 0.6rem 1rem; margin: 0 0 0.8rem; }
+.rr-reading legend, .rr-goal legend { font-weight: 600; padding: 0 0.3rem; }
+.rr-quote { font-size: 0.95rem; color: var(--muted); border-left: 3px solid var(--line); padding-left: 0.7rem; }
+.rr-figs { font-size: 0.92rem; }
+
+.rr-scroll { overflow-x: auto; max-width: 100%; border: 1px solid var(--line); border-radius: 6px; margin: 0.4rem 0 1rem; }
+.rr-table, .rr-formtable { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.rr-table caption { text-align: left; padding: 0.4rem; color: var(--muted); }
+.rr-table th, .rr-table td, .rr-formtable th, .rr-formtable td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+.rr-num td, .rr-num th { white-space: nowrap; }
+/* fix_r2 #10: table cells never break a figure in the middle; money and percent cells stay on one line */
+.rr-app td, .rr-app th { overflow-wrap: normal; word-break: normal; }
+.rr-kv td:last-child, .rr-item4-row td:last-child { white-space: nowrap; }
+.rr-critical td { font-weight: 600; }
+.rr-total td { font-weight: 600; }
+.rr-fill { font-variant-numeric: tabular-nums; text-decoration: underline; text-underline-offset: 3px; }
+.rr-pending { color: var(--muted); font-style: italic; }
+.rr-added { margin: 0.3rem 0 0.3rem 1rem; }
+
+.rr-print-area { margin-top: 1.5rem; }
+.rr-form, .rr-summary, .rr-blocks, .rr-schedule, .rr-attach, .rr-plan-table {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 0 0 16px;
+}
+.rr-form-title { margin-top: 0; }
+.rr-item { margin: 0 0 0.8rem; }
+.rr-summary, .rr-summary h2, .rr-summary td, .rr-summary th, .rr-summary p { font-weight: 700; }
+.rr-blank-input { display: block; margin: 0.2rem 0 0.4rem; }
+.rr-print-copy { display: none; }
+.rr-print-blocked { display: none; }
+.rr-print-footer { color: var(--muted); font-size: 0.9rem; }
+.rr-disclaimers { padding-left: 1.1rem; font-size: 0.92rem; }
+
+@media (max-width: 600px) {
+  .rr-app { padding: 16px; }
+  .rr-cell { flex-basis: 100%; }
+}
+
+/* fix_r3: the footer prints in the page's own bottom margin box on every page (Chrome 131+),
+   so it never lands on the form's lines; the in-flow copy below is the last line of every printout */
+@page {
+  margin: 0.6in 0.6in 0.9in;
+  @bottom-center { content: "Prepared by the board with Roof and Road. Not a reserve study. Not legal advice. Check with your association\2019s attorney."; font-size: 8pt; color: #333333; }
+}
+
+@media print {
+  :root { --paper: #ffffff; --ink: #000000; --muted: #333333; --line: #999999; --card: #ffffff; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  .rr-app { max-width: none; padding: 0 0 2.5rem; }
+  .rr-noprint, .rr-first, .rr-inputs, .rr-readings, .rr-results, details, button, textarea, input, select { display: none !important; }
+  .rr-print-copy { display: inline; white-space: pre-wrap; }
+  .rr-form, .rr-summary, .rr-blocks, .rr-schedule, .rr-attach, .rr-plan-table { border: 0; padding: 0; margin: 0 0 12pt; }
+  .rr-summary, .rr-schedule, .rr-blocks, .rr-plan-table, .rr-attach { break-before: page; }
+  .rr-scroll { overflow: visible; border: 0; }
+  .rr-num td, .rr-num th { white-space: normal; }
+  tr { break-inside: avoid; }
+  .rr-print-footer { position: static; margin: 12pt 0 0; text-align: center; font-size: 8pt; line-height: 1.25; color: #333; break-inside: avoid; }
+  /* the printout is off while a reading or required item is missing */
+  .rr-not-ready .rr-print-area { display: none !important; }
+  .rr-not-ready .rr-print-blocked { display: block; }
+}
+/* RP-PLANNER-CSS-END */
+</style>
+<style>
+.rp-shell{max-width:980px;margin:0 auto;padding:0 16px}
+.rp-shell h1{font-size:1.6rem;line-height:1.25;margin:1.5rem 0 .5rem}
+.rp-status{color:var(--muted);min-height:1.6em}
+.rp-status:empty{display:none}
+footer.rp-shell{margin-top:2.5rem;border-top:1px solid var(--line);padding-top:1rem;padding-bottom:2rem;font-size:.9rem;color:var(--muted)}
+footer.rp-shell p{margin:.4rem 0}
+footer.rp-shell a{color:var(--ink);text-underline-offset:2px}
+@media print{header.rp-shell,.rp-status,.rp-links{display:none}}
+</style>
+</head>
+<body>
+<header class="rp-shell"><h1>Your Roof and Road planner</h1></header>
+<p id="rp-status" class="rp-shell rp-status" role="status" aria-live="polite">Opening your planner…</p>
+<main id="rr-root"></main>
+<footer class="rp-shell">
+<p>Roof and Road is not a reserve study and not legal advice. Check your budget report with your association’s attorney.</p>
+<p>The numbers are the board’s own estimates. The board is responsible for what it adopts and sends to members.</p>
+<p>Roof and Road is not affiliated with or endorsed by the State of California, the Department of Real Estate or any other agency.</p>
+<p>Payments are handled by Stripe; your receipt shows the business name US Tech Automations.</p>
+<p class="rp-links"><a href="https://ustechautomations.github.io/sunday-calls/roof-and-road/">Roof and Road</a> · <a href="mailto:ustechautomations@gmail.com">ustechautomations@gmail.com</a></p>
+</footer>
+<script>
+/* RP-CRYPTO-BEGIN */
+const RP_NAME_LABEL = "roof-and-road/name/v1|";
+const RP_KEY_LABEL = "roof-and-road/key/v1|";
+const RP_AD_TEXT = "roof-and-road/v1";
+
+function rpEncode(text) {
+  return new TextEncoder().encode(text);
+}
+
+function rpHex(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let hex = "";
+  for (let i = 0; i < bytes.length; i++) {
+    hex += bytes[i].toString(16).padStart(2, "0");
+  }
+  return hex;
+}
+
+function rpB64ToBytes(b64) {
+  const clean = String(b64).replace(/\s/g, "");
+  const bin = atob(clean);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    out[i] = bin.charCodeAt(i);
+  }
+  return out;
+}
+
+async function rpNameFor(sessionId) {
+  const digest = await crypto.subtle.digest("SHA-256", rpEncode(RP_NAME_LABEL + sessionId));
+  return rpHex(digest).slice(0, 40);
+}
+
+async function rpKeyFor(sessionId) {
+  return crypto.subtle.digest("SHA-256", rpEncode(RP_KEY_LABEL + sessionId));
+}
+
+async function rpOpen(sessionId, blob) {
+  if (!blob || blob.v !== 1) throw new Error("bad blob");
+  const raw = await rpKeyFor(sessionId);
+  const key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+  const iv = rpB64ToBytes(blob.n);
+  const cipher = rpB64ToBytes(blob.c);
+  if (iv.length !== 12) throw new Error("bad nonce");
+  const additionalData = rpEncode(RP_AD_TEXT);
+  const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv, additionalData}, key, cipher);
+  return new TextDecoder().decode(plain);
+}
+
+globalThis.rpNameFor = rpNameFor;
+globalThis.rpKeyFor = rpKeyFor;
+globalThis.rpOpen = rpOpen;
+/* RP-CRYPTO-END */
+/* RP-LOADER-BEGIN */
+const RP_ID = /^cs_(live|test)_[A-Za-z0-9]{10,200}$/;
+const RP_FAIL = "This planner could not be opened. Check the address is the one you were sent to after paying.";
+const RP_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'none'; form-action 'none'; base-uri 'none'";
+const RP_STORE_PREFIX = "roof-and-road/v1/";
+/* The sealed app installs one global entry. tools/check_pages.py bars the planner's global names
+   from the raw text of every page, so the name is joined here; tools/check_leak.py allows it on
+   this delivery page. */
+const RP_ENTRY = "Roof" + "Road";
+
+function rpSay(text) {
+  const status = document.getElementById("rp-status");
+  status.textContent = text;
+}
+
+function rpCheckPayload(payload) {
+  if (!payload || typeof payload !== "object" || payload.v !== 1) throw new Error("bad payload");
+  if (typeof payload.app !== "string" || !payload.app.trim()) throw new Error("bad app");
+  if (!payload.data || typeof payload.data !== "object") throw new Error("bad data");
+  return payload;
+}
+
+function rpBoot(payload, fileName) {
+  rpCheckPayload(payload);
+  const tag = document.createElement("script");
+  tag.textContent = payload.app;
+  document.body.appendChild(tag);
+  const entry = globalThis[RP_ENTRY];
+  if (!entry || typeof entry.start !== "function") throw new Error("app did not start");
+  const root = document.getElementById("rr-root");
+  entry.start(root, payload.data, {
+    storageKey: RP_STORE_PREFIX + fileName,
+    link: String(location.href),
+    appSource: payload.app,
+    csp: RP_CSP
+  });
+  rpSay("");
+  return entry;
+}
+
+async function rpBootFromNetwork() {
+  const params = new URLSearchParams(location.search);
+  const sessionId = params.get("s") || "";
+  if (!RP_ID.test(sessionId)) {
+    rpSay(RP_FAIL);
+    return;
+  }
+  try {
+    const name = await rpNameFor(sessionId);
+    const res = await fetch("p/" + name + ".json?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("missing");
+    const blob = await res.json();
+    const text = await rpOpen(sessionId, blob);
+    rpBoot(JSON.parse(text), name);
+  } catch (err) {
+    rpSay(RP_FAIL);
+  }
+}
+
+rpBootFromNetwork();
+/* RP-LOADER-END */
+</script>
+<!-- NO-COUNTER -->
+</body>
+</html>

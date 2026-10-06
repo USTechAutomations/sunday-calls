@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /p/
+Disallow: /thanks.html
+Disallow: /planner.html
+Sitemap: https://ustechautomations.github.io/sunday-calls/roof-and-road/sitemap.xml
