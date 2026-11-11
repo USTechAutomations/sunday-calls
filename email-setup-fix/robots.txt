@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /notes/
+Disallow: /thanks.html
+Sitemap: https://ustechautomations.github.io/sunday-calls/email-setup-fix/sitemap.xml

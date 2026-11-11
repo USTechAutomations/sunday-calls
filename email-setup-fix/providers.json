@@ -1,0 +1,87 @@
+{
+ "google_workspace": {
+  "name": "Google Workspace", "kind": "mailbox", "mx_suffixes": ["google.com", "googlemail.com"],
+  "spf_include": "_spf.google.com",
+  "dkim_switch": "in the Admin console under Authenticate email, the Start authentication button",
+  "source_url": "https://knowledge.workspace.google.com/admin/security/set-up-dkim",
+  "dkim": {"type": "TXT", "hosts": ["google._domainkey"], "steps": [
+   "Sign in to the Google Admin console as a super administrator.",
+   "Go to Menu > Apps > Google Workspace > Gmail, then click Authenticate email.",
+   "In the Selected domain menu, choose {domain}.",
+   "Click Generate New Record. Pick key length 2048 (pick 1024 only if your DNS provider cannot take 2048) and leave the prefix selector as google.",
+   "Click Generate, then copy the TXT record value Google shows. The record name is google._domainkey.{domain}.",
+   "At the company that hosts your DNS, add a TXT record with that name and that value. Do not click Start authentication yet.",
+   "When the record is live, go back to Authenticate email and click Start authentication. Google says a new Gmail setup can take 24 to 72 hours before the key is available."]}
+ },
+ "microsoft_365": {
+  "name": "Microsoft 365", "kind": "mailbox", "mx_suffixes": ["mail.protection.outlook.com"],
+  "spf_include": "spf.protection.outlook.com",
+  "dkim_switch": "in the Defender portal, the Sign messages for this domain with DKIM signatures switch",
+  "source_url": "https://learn.microsoft.com/en-us/defender-office-365/email-authentication-dkim-configure",
+  "dkim": {"type": "CNAME", "hosts": ["selector1._domainkey", "selector2._domainkey"], "steps": [
+   "Sign in to the Microsoft Defender portal at security.microsoft.com.",
+   "Go to Email & collaboration > Policies & rules > Threat policies > Email authentication settings, then open the DKIM tab.",
+   "Click the row for {domain} (not the on/off switch) to open its details panel. If it shows no CNAME values yet, slide the switch to Enabled once: an error box appears that holds the values. Click OK, then open the row again.",
+   "Under Publish CNAMEs you will see two values. Click Copy.",
+   "At the company that hosts your DNS, create two CNAME records: name selector1._domainkey.{domain} pointing to the first value, and name selector2._domainkey.{domain} pointing to the second value.",
+   "Wait a few minutes (it can take longer), reopen the details panel, and turn on Sign messages for this domain with DKIM signatures."]}
+ },
+ "zoho": {
+  "name": "Zoho Mail", "kind": "mailbox", "mx_suffixes": ["zoho.com"],
+  "spf_include": "zohomail.com",
+  "dkim_switch": "in Zoho Mail Admin Console, the DKIM tab, where DKIM is enabled after the selector is verified",
+  "source_url": "https://www.zoho.com/mail/help/adminconsole/dkim-configuration.html",
+  "dkim": {"type": "TXT", "hosts": ["zoho._domainkey"], "steps": [
+   "Sign in to the Zoho Mail Admin Console as an administrator.",
+   "Open Domains in the left menu and select {domain}.",
+   "On the Email Configuration tab, select DKIM.",
+   "Add a new selector and name it zoho. Choose key length 2048 (or 1024 if your DNS provider cannot take 2048).",
+   "Copy the TXT value Zoho generates.",
+   "At the company that hosts your DNS, add a TXT record named zoho._domainkey.{domain} with that value. Some DNS providers add the domain for you; then type only zoho._domainkey.",
+   "Back in Zoho, click Verify next to the selector. When asked, enable DKIM so outgoing mail is signed."]}
+ },
+ "mailchimp": {
+  "name": "Mailchimp", "kind": "bulk", "spf_include": null,
+  "source_url": "https://mailchimp.com/help/set-up-email-domain-authentication/",
+  "dkim": {"type": "CNAME", "hosts": [], "steps": [
+   "In Mailchimp click your profile icon and choose Account & billing (account managers click Account).",
+   "Open the Domains tab and click Start authentication next to {domain}.",
+   "Choose your DNS provider in the drop-down and click Next.",
+   "Click Or manually authenticate your domain, choose your provider (or Other) and click Next.",
+   "At the company that hosts your DNS, add the two CNAME records (Name and Value) that Mailchimp shows. Then click Next in Mailchimp.",
+   "Mailchimp then asks for a DMARC record. Do not add a second one: a domain may have only one DMARC record, so use the DMARC line in this result.",
+   "Wait for Mailchimp to validate the records. It usually takes minutes but can take up to 48 hours."]}
+ },
+ "sendgrid": {
+  "name": "SendGrid", "kind": "bulk", "spf_include": null,
+  "source_url": "https://www.twilio.com/docs/sendgrid/ui/account-and-settings/how-to-set-up-domain-authentication",
+  "dkim": {"type": "CNAME", "hosts": ["s1._domainkey", "s2._domainkey"], "steps": [
+   "In SendGrid go to Settings > Sender Authentication and click Get Started in the Domain Authentication section.",
+   "Choose your DNS host and choose whether to turn on link branding.",
+   "Enter {domain} as the root domain (no subdomain, no https://).",
+   "Open Advanced Settings and leave Use automated security ticked. With it on, SendGrid handles SPF through its CNAME records, so no extra SPF entry is needed.",
+   "Click Next to reach Install DNS Records and choose Manual Setup.",
+   "At the company that hosts your DNS, add the CNAME records SendGrid lists (one starting with em, plus s1._domainkey and s2._domainkey). If your DNS provider adds the domain for you, type only the part before it.",
+   "Click Verify in SendGrid. It can take up to 48 hours."]}
+ },
+ "mailgun": {
+  "name": "Mailgun", "kind": "bulk", "spf_include": "mailgun.org",
+  "source_url": "https://documentation.mailgun.com/docs/mailgun/user-manual/domains/domains-verify",
+  "dkim": {"type": "TXT", "hosts": [], "steps": [
+   "In the Mailgun control panel open {domain} and go to the Domain Verification & DNS section.",
+   "Copy the DKIM record shown there (its name and value are specific to your Mailgun account).",
+   "At the company that hosts your DNS, add that record exactly as shown.",
+   "Wait. Mailgun says this can take 24 to 48 hours.",
+   "Click Verify DNS settings in the Domain Settings section, or let Mailgun's automatic check pick it up."]}
+ },
+ "amazon_ses": {
+  "name": "Amazon SES", "kind": "bulk", "spf_include": null,
+  "source_url": "https://docs.aws.amazon.com/ses/latest/dg/send-email-authentication-dkim-easy-managing.html",
+  "dkim": {"type": "CNAME", "hosts": [], "steps": [
+   "Sign in to the AWS Management Console and open the Amazon SES console.",
+   "In the left menu, under Configuration, choose Verified identities, then choose {domain}.",
+   "On the Authentication tab, expand View DNS records.",
+   "Copy the three Easy DKIM CNAME records. Each name ends in ._domainkey.{domain}.",
+   "At the company that hosts your DNS, add all three CNAME records exactly as shown. SPF needs no change unless you use a custom MAIL FROM domain."]}
+ }
+}
